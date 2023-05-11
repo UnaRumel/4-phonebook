@@ -1,20 +1,22 @@
-import { Label, FindInput } from './Filter.styled';
+import s from './Filter.module.css';
 import PropTypes from 'prop-types';
 
-export const Filter = ({ filter, filterContact }) => {
-  return (
-    <Label>
-      Find contacts by name
-      <FindInput
-        type="text"
-        name="filter"
-        value={filter}
-        onChange={filterContact}
-      />
-    </Label>
-  );
-};
+export default function Filter({ value, onChange }) {
+    return (
+        <label className={s.text}>
+            Find contacts by name
+            <input
+                placeholder="Search"
+                className={s.value}
+                type="text"
+                value={value}
+                onChange={onChange}
+            />
+        </label>
+    );
+}
 
-Label.propTypes = {
-  filter: PropTypes.string,
+Filter.propTypes = {
+    value: PropTypes.string.isRequired,
+    onChange: PropTypes.func.isRequired,
 };
