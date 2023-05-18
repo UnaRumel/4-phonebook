@@ -1,18 +1,22 @@
 import PropTypes from 'prop-types';
+import style from './Filter.module.scss';
 
-const Filter = ({ onChange }) => {
-  const handleChange = event => {
-    onChange(event.target.value);
-  };
-  return (
-    <>
-      <p>Find contacts by name</p>
-      <input onChange={handleChange} type="search" name="filter" id="" />
-    </>
-  );
-};
+const Filter = ({ value, onChange }) => (
+  <label className={style.label}>
+    Find contacts by name
+    <input
+      type="text"
+      name="filter"
+      className={style.inputName}
+      title="Enter search name"
+      onChange={onChange}
+      value={value}
+    />
+  </label>
+);
 
 Filter.propTypes = {
+  value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 

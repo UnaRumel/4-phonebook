@@ -1,16 +1,15 @@
-import { nanoid } from 'nanoid';
-import initialContacts from '../data/contacts.json';
-import ContactForm from './contact_form/ContactForm';
-import Filter from './filter/Filter';
-import ContactList from './contact_list/ContactList';
-import { ContainerSettings } from './container_settings/ConteinerSettings.style';
 import { useState, useEffect } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const savedContacts =
-  JSON.parse(localStorage.getItem('contacts')) || initialContacts;
+import { ContactForm } from './ContactForm/ContactForm';
+import Filter from './Filter/Filter';
+import ContactList from './ContactList/ContactList';
+import { useLocalSorage } from '../hooks/useLocalStorage';
+import style from '../components/App.module.scss';
 
 export const App = () => {
-  const [contacts, setContacts] = useState(() => savedContacts);
+  const { contacts, setContacts } = useLocalSorage();
 
   const [filter, setFilter] = useState('');
 
@@ -18,39 +17,42 @@ export const App = () => {
     localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
-  const addContact = (name, number) => {
-    !contacts.find(contact => contact.name.toLowerCase() === name.toLowerCase())
-      ? setContacts(prevContacts => [
-          ...prevContacts,
-          { id: nanoid(), name: name, number: number },
-        ])
-      : alert(`${name} is already in contacts`);
+  const handleAddNewContact = newContact => {
+    setContacts(prevState => [...prevState, newContact]);
   };
 
-  const handleChange = value => {
-    setFilter(value);
+  const handleChangeFilter = event => {
+    setFilter(event.currentTarget.value);
   };
 
-  const deleteContact = contactId => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== contactId.id)
+  const getFilteredContacts = () => {
+    const normalizeFilter = filter.toLowerCase();
+
+    return contacts.filter(({ name }) =>
+      name.toLowerCase().includes(normalizeFilter)
     );
   };
 
-  const getFilterContacts = () =>
-    contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
-    );
+  const handleDeleteContact = contactId => {
+    setContacts(prevState => prevState.filter(({ id }) => id !== contactId));
+  };
+
+  const contactsName = contacts.map(contact => contact.name);
 
   return (
-    <>
-      <ContainerSettings>
-        <h1>Phonebook</h1>
-        <ContactForm addContact={addContact} />
-        <h2>Contacts</h2>
-        <Filter onChange={handleChange} />
-      </ContainerSettings>
-      <ContactList contacts={getFilterContacts()} onDelete={deleteContact} />
-    </>
+    <div>
+      <h1 className={style.title}>Phonebook</h1>
+      <ContactForm onSubmit={handleAddNewContact} contactsName={contactsName} />
+
+      <h2 className={style.title}>Contacts</h2>
+      <div className={style.contact_list_container}>
+        <Filter value={filter} onChange={handleChangeFilter} />
+        <ContactList
+          visibleContacts={getFilteredContacts()}
+          onDeleteContact={handleDeleteContact}
+        />
+      </div>
+      <ToastContainer />
+    </div>
   );
 };
